@@ -1,0 +1,20 @@
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: radial-gradient(circle at center, #010b18 0%, #000 90%);
+  overflow: hidden;
+}
+
+#canvas1 {
+  width: 95vw;
+  max-width: 900px;
+  height: auto;
+  border: 2px solid #0056ff;
+  border-radius: 16px;
+  box-shadow: 0 0 25px #0056ff;
+  background: rgba(0, 0, 40, 0.4);
+  touch-action: none;
+}
