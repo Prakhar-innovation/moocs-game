@@ -8,14 +8,13 @@ window.addEventListener("load", () => {
   }
   resize();
 
-  /* ===== IMAGES ===== */
+ 
   const playerImg = new Image();
   playerImg.src = "hero.png";
 
   const enemyImg = new Image();
   enemyImg.src = "enemy.jpg";
 
-  /* ===== INPUT ===== */
   const input = { up: false, down: false, shoot: false };
 
   window.addEventListener("keydown", e => {
@@ -28,19 +27,18 @@ window.addEventListener("load", () => {
     input.up = input.down = input.shoot = false;
   });
 
-  /* ===== UTILS ===== */
+  
   function getCanvasPos(e) {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-
     return {
       x: (e.clientX - rect.left) * scaleX,
       y: (e.clientY - rect.top) * scaleY
     };
   }
 
-  /* ===== CLASSES ===== */
+ 
 
   class Projectile {
     constructor(x, y) {
@@ -136,6 +134,13 @@ window.addEventListener("load", () => {
 
       this.pauseBtn = { x: 960, y: 40, r: 18 };
       this.restartBtn = { x: 420, y: 250, w: 160, h: 50 };
+
+      
+      this.controls = {
+        up:    { x: 80,  y: 380, r: 28, label: "▲" },
+        down:  { x: 80,  y: 440, r: 28, label: "▼" },
+        shoot: { x: 920, y: 410, r: 32, label: "●" }
+      };
     }
 
     hit(a, b) {
@@ -200,6 +205,28 @@ window.addEventListener("load", () => {
       ctx.fillRect(this.pauseBtn.x + 2, this.pauseBtn.y - 8, 4, 16);
     }
 
+    drawControls() {
+      ctx.globalAlpha = 0.85;
+
+      Object.values(this.controls).forEach(btn => {
+        ctx.shadowColor = "#00e5ff";
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = "rgba(0,229,255,0.25)";
+        ctx.beginPath();
+        ctx.arc(btn.x, btn.y, btn.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#00e5ff";
+        ctx.font = "20px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(btn.label, btn.x, btn.y);
+      });
+
+      ctx.globalAlpha = 1;
+    }
+
     drawGameOver() {
       ctx.fillStyle = "rgba(0,0,0,0.6)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -223,6 +250,7 @@ window.addEventListener("load", () => {
       this.player.draw();
       this.enemies.forEach(e => e.draw());
       this.drawUI();
+      this.drawControls();
       if (this.gameOver) this.drawGameOver();
     }
   }
@@ -230,7 +258,7 @@ window.addEventListener("load", () => {
   const game = new Game();
   let last = 0;
 
-  /* ===== POINTER EVENTS (FIXED) ===== */
+  /* ===== POINTER EVENTS ===== */
 
   canvas.addEventListener("pointerdown", e => {
     const { x, y } = getCanvasPos(e);
@@ -251,10 +279,20 @@ window.addEventListener("load", () => {
       return;
     }
 
-    // Controls
-    if (x > canvas.width * 0.7) input.shoot = true;
-    else if (y < canvas.height / 2) input.up = true;
-    else input.down = true;
+    // On-screen controls
+    const c = game.controls;
+    if (Math.hypot(x - c.up.x, y - c.up.y) <= c.up.r) {
+      input.up = true;
+      return;
+    }
+    if (Math.hypot(x - c.down.x, y - c.down.y) <= c.down.r) {
+      input.down = true;
+      return;
+    }
+    if (Math.hypot(x - c.shoot.x, y - c.shoot.y) <= c.shoot.r) {
+      input.shoot = true;
+      return;
+    }
   });
 
   canvas.addEventListener("pointerup", () => {
